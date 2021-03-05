@@ -1,18 +1,19 @@
 package graph;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public class Node extends GraphElement {
+public class Node {
 
     public final String name;
-    public final HashMap<Node, Double> listEdges;
+    public final ConcurrentHashMap<Node, Double> listEdges;
 
 
     public Node(String name) {
         this.name = name;
 
-        this.listEdges = new HashMap<>();
+        this.listEdges = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -23,25 +24,11 @@ public class Node extends GraphElement {
         return Objects.equals(name, node.name);
     }
 
-//    @Override
-//    public String toString() {
-//        return "Node{" +
-//                "name='" + this.name + '\'' +
-//                ", listEdges=" + this.listEdges +
-//                '}';
-//    }
-
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
-
     void addEdge(Node n, Double weight) {
         listEdges.put(n, weight);
     }
 
-    public HashMap<Node, Double> getListEdges() {
+    public ConcurrentHashMap<Node, Double> getListEdges() {
         return listEdges;
     }
 }

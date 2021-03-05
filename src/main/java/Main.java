@@ -1,3 +1,4 @@
+import graph.Graph;
 import graph.Node;
 import graph.Unit;
 
@@ -17,8 +18,10 @@ public class Main {
         for (Map.Entry<String, Node> m :
              unit.getMapNode().entrySet()) {
 
-            System.out.println(m.getKey() + " " + m.getValue().listEdges);
-            
+            int length = m.getValue().getListEdges().keySet().stream().toArray().length;
+            Node[] node = m.getValue().getListEdges().keySet().toArray(new Node[length]);
+
+            System.out.printf("%s %s%n", m.getKey(), node.length);
         }
 
 
