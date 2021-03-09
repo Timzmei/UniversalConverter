@@ -24,6 +24,8 @@ public class Main {
             System.out.printf("%s %s%n", m.getKey(), node.length);
         }
 
+        new Server().bootstrap();
+
 
 
 
@@ -37,3 +39,6 @@ public class Main {
 //    }
 
 }
+
+
+

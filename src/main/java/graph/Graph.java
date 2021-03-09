@@ -41,14 +41,6 @@ public class Graph {
         return nodeNameToNode.get(name);
     }
 
-//    public Node getNodeOrThrow(final String name) {
-//        final Node node = nodeNameToNode.get(name);
-//        if (node == null) {
-//            throw new NodeNotFoundException(name);
-//        }
-//        return node;
-//    }
-
     public void addEdge(Node fromNode, Node toNode, Double weight) {
 
         fromNode.addEdge(toNode, weight);
