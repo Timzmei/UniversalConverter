@@ -1,17 +1,15 @@
 import Request.RequestBody;
 import com.google.gson.Gson;
-import graph.Graph;
 import graph.Node;
 import graph.Unit;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static spark.Spark.*;
 
 public class Main {
-    public static final String JSON_MIME_TYPE = "application/json";
-
     private static final String SERVER_HOST = "localhost";
     private static final int SERVER_PORT = 8080;
 
@@ -29,41 +27,39 @@ public class Main {
 
         post("/convert", (req, res) -> {
             RequestBody requestBody = gson.fromJson(req.body(), RequestBody.class);
+            String answer = readUnit(requestBody, unit);
 
-            return readUnit(requestBody, unit);
+            if(answer.equals("404")){
+                res.status(404);
+                return "Невозможно осуществить такое преобразование";
+            }
+
+            if(answer.equals("400")){
+                res.status(400);
+                return "В выражениях используются неизвестные единицы измерения";
+            }
+
+            res.status(200);
+            return answer;
         });
-
-
-
-
 
     }
 
     public static Unit readCSV() throws Exception {
         ReadCSV readCSV = new ReadCSV();
 
-        Unit unit = new Unit(readCSV.getList());
-//        for (Map.Entry<String, Node> m :
-//                unit.getMapNode().entrySet()) {
-//
-//            int length = m.getValue().getListEdges().keySet().toArray().length;
-//            Node[] node = m.getValue().getListEdges().keySet().toArray(new Node[length]);
-//
-//            System.out.printf("%s %s%n", m.getKey(), node.length);
-//        }
-
-        return  unit;
+        return new Unit(readCSV.getList());
 
     }
 
-    public static String readUnit(RequestBody requestBody, Unit unit){
+    public static String readUnit(RequestBody requestBody, Unit unit) {
         String fromUnit = requestBody.getFrom();
         String toUnit = requestBody.getTo();
         String numerator = fromUnit;
         String denominator = toUnit;
 
         if(fromUnit == null){
-            return "Код 400 Bad Request, если в выражениях используются неизвестные единицы измерения (т.е. отсутствуют в предоставленном файле с правилами конвертации).";
+            return "400";
         }
         else if (toUnit == null){
             if(fromUnit.contains("/")) {
@@ -73,7 +69,7 @@ public class Main {
                 return calculation(numerator, denominator, unit);
             }
             else{
-                return "Сдеся Код 400 Bad Request, если в выражениях используются неизвестные единицы измерения (т.е. отсутствуют в предоставленном файле с правилами конвертации).";
+                return "400";
             }
         }
         else if (toUnit.contains("/") && fromUnit.contains("/")){
@@ -92,12 +88,12 @@ public class Main {
 
     }
 
-    public static String calculation(String numerator, String denominator, Unit unit){
+    public static String calculation(String numerator, String denominator, Unit unit) {
 
         List<String> numeratorElements = new ArrayList<>(Arrays.asList(numerator.split("\\*")));
         List<String> denominatorElements = new ArrayList<>(Arrays.asList(denominator.split("\\*")));
         Map<String, Node> unitMap = unit.getMapNode();
-        Double k = 1.0;
+        double k = 1.0;
 
         for (int n = numeratorElements.size() - 1; n >= 0; n--){
             for (int d = denominatorElements.size() - 1; d >= 0; d--){
@@ -110,22 +106,32 @@ public class Main {
                         numeratorElements.remove(n);
                         denominatorElements.remove(d);
                     }
-
                 }
                 else {
-                    return "Тута Код 400 Bad Request, если в выражениях используются неизвестные единицы измерения (т.е. отсутствуют в предоставленном файле с правилами конвертации).";
+                    return "400";
                 }
             }
         }
 
-        if(numeratorElements.size() == 0 && denominatorElements.size() == 0){
-            return Double.toString(k);
+        if (numeratorElements.size() == 0 || denominatorElements.size() == 0) {
+
+            return doubleToString(k);
+        }else {
+            return "404";
+        }
+    }
+
+    public static String doubleToString(double k){
+        String[] splitter = String.valueOf(k).split("\\.");
+        int i = splitter[1].length();
+        String formattedDouble;
+        if (i > 15){
+            formattedDouble = new DecimalFormat("#0.000000000000000").format(k);
         }
         else {
-            return "Код 404 Not Found, если невозможно осуществить такое преобразование (например, нельзя перевести метры в килограммы).";
+            formattedDouble = Double.toString(k);
         }
-
-
+        return formattedDouble;
     }
 
 
