@@ -1,11 +1,9 @@
 import Request.RequestBody;
 import com.google.gson.Gson;
-import graph.Node;
 import graph.Unit;
 
+import java.io.File;
 import java.text.DecimalFormat;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static spark.Spark.*;
 
@@ -13,21 +11,23 @@ public class Main {
     private static final String SERVER_HOST = "localhost";
     private static final int SERVER_PORT = 8080;
 
-    private static Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
 
 
     public static void main(String[] args) throws Exception {
 
+        String path = args[0];
 
-        Unit unit = readCSV();
+
+
+        Unit unit = readCSV(path);
 
         ipAddress(SERVER_HOST);
         port(SERVER_PORT);
 
-
         post("/convert", (req, res) -> {
-            RequestBody requestBody = gson.fromJson(req.body(), RequestBody.class);
-            String answer = readUnit(requestBody, unit);
+            RequestBody requestBody = GSON.fromJson(req.body(), RequestBody.class);
+            String answer = readUnit(requestBody.getFrom().trim(), requestBody.getTo().trim(), unit);
 
             if(answer.equals("404")){
                 res.status(404);
@@ -45,93 +45,58 @@ public class Main {
 
     }
 
-    public static Unit readCSV() throws Exception {
-        ReadCSV readCSV = new ReadCSV();
+    public static Unit readCSV(String path) throws Exception {
+        ReadCSV readCSV = new ReadCSV(path);
 
         return new Unit(readCSV.getList());
 
     }
 
-    public static String readUnit(RequestBody requestBody, Unit unit) {
-        String fromUnit = requestBody.getFrom();
-        String toUnit = requestBody.getTo();
-        String numerator = fromUnit;
-        String denominator = toUnit;
+    public static String gettingFraction(String fromUnit, String toUnit){
+        String fraction = " / ";
 
-        if(fromUnit == null){
-            return "400";
-        }
-        else if (toUnit == null){
-            if(fromUnit.contains("/")) {
-                String[] fromUnitSplit = fromUnit.split("/");
-                numerator = fromUnitSplit[0].trim();
-                denominator = fromUnitSplit[1].trim();
-                return calculation(numerator, denominator, unit);
-            }
-            else{
-                return "400";
-            }
-        }
-        else if (toUnit.contains("/") && fromUnit.contains("/")){
-            String[] fromUnitSplit = fromUnit.split("/");
-            String[] toUnitSplit = toUnit.split("/");
-            numerator = fromUnitSplit[0].trim() + " * " + toUnitSplit[1].trim();
-            denominator = fromUnitSplit[1].trim() + " * " + toUnitSplit[0].trim();
-            return calculation(numerator, denominator, unit);
+        String[] fromUnitSplit = fromUnit.split("/");
+        String[] toUnitSplit = toUnit.split("/");
+        fraction = (toUnitSplit.length == 2) ? fromUnitSplit[0].trim() + " * " + toUnitSplit[1].trim() + fraction : fromUnitSplit[0].trim() + fraction;
+        fraction = (fromUnitSplit.length == 2) ? fraction + fromUnitSplit[1].trim() + " * " + toUnitSplit[0].trim() : fraction + toUnitSplit[0].trim();
+        return fraction;
+    }
 
+    public static String readUnit(String fromUnit, String toUnit, Unit unit) {
+        String[] fraction = new String[2];
+        if(fromUnit.equals("") && toUnit.equals("")){
+            return "404";
         }
-        else if (!toUnit.contains("/") && !fromUnit.contains("/")){
-            return calculation(numerator, denominator, unit);
+        else if(fromUnit.equals("") && !toUnit.contains("/") || toUnit.equals("") && !fromUnit.contains("/")){
+            fraction[0] = (fromUnit.equals("")) ? toUnit : fromUnit;
+            fraction[1] = "";
         }
-        return calculation(numerator, denominator, unit);
-
-
+        else if (toUnit.equals("") && fromUnit.contains("/") || fromUnit.equals("") && toUnit.contains("/")){
+            fraction = (toUnit.equals("")) ? fromUnit.split("/") : toUnit.split("/");
+        }
+        else if (!toUnit.equals("") && !fromUnit.equals("")){
+            fraction = gettingFraction(fromUnit, toUnit).split("/");
+        }
+        return calculation(fraction[0].trim(), fraction[1].trim(), unit);
     }
 
     public static String calculation(String numerator, String denominator, Unit unit) {
 
-        List<String> numeratorElements = new ArrayList<>(Arrays.asList(numerator.split("\\*")));
-        List<String> denominatorElements = new ArrayList<>(Arrays.asList(denominator.split("\\*")));
-        Map<String, Node> unitMap = unit.getMapNode();
-        double k = 1.0;
-
-        for (int n = numeratorElements.size() - 1; n >= 0; n--){
-            for (int d = denominatorElements.size() - 1; d >= 0; d--){
-
-                if (unitMap.containsKey(numeratorElements.get(n).trim()) || unitMap.containsKey(denominatorElements.get(d).trim())){
-                    ConcurrentHashMap<Node, Double> nodeMapNmtr = unitMap.get(numeratorElements.get(n).trim()).listEdges;
-
-                    if (nodeMapNmtr.containsKey(unitMap.get(denominatorElements.get(d).trim()))){
-                        k = k * nodeMapNmtr.get(unitMap.get(denominatorElements.get(d).trim()));
-                        numeratorElements.remove(n);
-                        denominatorElements.remove(d);
-                    }
-                }
-                else {
-                    return "400";
-                }
-            }
+        Calculate calculate = new Calculate(numerator, denominator, unit.getMapNode());
+        calculate.run();
+        if(calculate.getAnswer().equals("400")){
+            return "400";
         }
-
-        if (numeratorElements.size() == 0 || denominatorElements.size() == 0) {
-
-            return doubleToString(k);
-        }else {
+        else if (calculate.getNEMERATOR_ELEMENTS() == 0 || calculate.getDENOMINATOR_ELEMENTS() == 0) {
+            return doubleToString(calculate.getK());
+        }
+        else {
             return "404";
         }
     }
 
     public static String doubleToString(double k){
-        String[] splitter = String.valueOf(k).split("\\.");
-        int i = splitter[1].length();
-        String formattedDouble;
-        if (i > 15){
-            formattedDouble = new DecimalFormat("#0.000000000000000").format(k);
-        }
-        else {
-            formattedDouble = Double.toString(k);
-        }
-        return formattedDouble;
+        return new DecimalFormat("#0.000000000000000").format(k);
     }
 
 

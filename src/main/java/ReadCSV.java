@@ -10,8 +10,8 @@ public class ReadCSV {
 
     private List<String[]> list;
 
-    public ReadCSV() throws Exception {
-        list = readAll("file.csv");
+    public ReadCSV(String path) throws Exception {
+        list = readAll(path);
     }
 
     public List<String[]> readAll(String path) throws Exception {
