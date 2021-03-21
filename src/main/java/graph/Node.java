@@ -2,7 +2,6 @@ package graph;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 public class Node {
 
@@ -28,7 +27,4 @@ public class Node {
         listEdges.put(n, weight);
     }
 
-    public ConcurrentHashMap<Node, Double> getListEdges() {
-        return listEdges;
-    }
 }

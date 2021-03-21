@@ -15,9 +15,7 @@ public class Graph {
         } else{
             n = new Node(name);
             nodeNameToNode.put(name, n);
-
         }
-
         return n;
     }
 
@@ -26,7 +24,6 @@ public class Graph {
         final Node toNode = getNode(toNodeName);
 
         System.out.println(fromNodeName + " " + toNodeName + " " + weight);
-//        System.out.println((weight));
 
         if(!(toNode.listEdges.containsKey(fromNode))){
             addEdge(toNode, fromNode, (1 / weight));
@@ -42,10 +39,7 @@ public class Graph {
     }
 
     public void addEdge(Node fromNode, Node toNode, Double weight) {
-
         fromNode.addEdge(toNode, weight);
-
-
         fromNode.listEdges.forEach((k, v) -> {
             if(!(k.listEdges.containsKey(toNode)) || !(k.name.equals(toNode.name))) {
                 k.addEdge(toNode, (weight / v));

@@ -1,8 +1,6 @@
 import Request.RequestBody;
 import com.google.gson.Gson;
 import graph.Unit;
-
-import java.io.File;
 import java.text.DecimalFormat;
 
 import static spark.Spark.*;
@@ -12,6 +10,9 @@ public class Main {
     private static final int SERVER_PORT = 8080;
 
     private static final Gson GSON = new Gson();
+    private static final int STATUS_CODE_404 = 404;
+    private static final int STATUS_CODE_400 = 400;
+    private static final int STATUS_CODE_200 = 200;
 
 
     public static void main(String[] args) throws Exception {
@@ -30,16 +31,16 @@ public class Main {
             String answer = readUnit(requestBody.getFrom().trim(), requestBody.getTo().trim(), unit);
 
             if(answer.equals("404")){
-                res.status(404);
+                res.status(STATUS_CODE_404);
                 return "Невозможно осуществить такое преобразование";
             }
 
             if(answer.equals("400")){
-                res.status(400);
+                res.status(STATUS_CODE_400);
                 return "В выражениях используются неизвестные единицы измерения";
             }
 
-            res.status(200);
+            res.status(STATUS_CODE_200);
             return answer;
         });
 

@@ -5,7 +5,6 @@ import lombok.Data;
 @Data
 public class RequestBody {
 
-
     private String from;
     private String to;
 
