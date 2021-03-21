@@ -26,11 +26,5 @@ public class ReadCSV {
         return list;
     }
 
-    //    public List<String[]> readCSV() throws Exception {
-//        Reader reader = Files.newBufferedReader(Paths.get(
-//                ClassLoader.getSystemResource("file.csv").toURI()));
-//        return readAll(reader);
-//    }
-
 
 }
