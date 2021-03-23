@@ -19,8 +19,6 @@ public class Main {
 
         String path = args[0];
 
-
-
         Unit unit = readCSV(path);
 
         ipAddress(SERVER_HOST);
