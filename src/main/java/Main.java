@@ -86,7 +86,7 @@ public class Main {
         if(calculate.getAnswer().equals("400")){
             return "400";
         }
-        else if (calculate.getNEMERATOR_ELEMENTS() == 0 || calculate.getDENOMINATOR_ELEMENTS() == 0) {
+        else if (calculate.getNUMERATOR_ELEMENTS() == 0 || calculate.getDENOMINATOR_ELEMENTS() == 0) {
             return doubleToString(calculate.getK());
         }
         else {

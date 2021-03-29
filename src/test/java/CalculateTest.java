@@ -11,14 +11,14 @@ public class CalculateTest {
     public void testConstructor() {
         Calculate actualCalculate = new Calculate("Numerator", "Denominator", new HashMap<String, Node>(1));
         assertEquals("200", actualCalculate.getAnswer());
-        assertEquals(1, actualCalculate.getNEMERATOR_ELEMENTS());
+        assertEquals(1, actualCalculate.getNUMERATOR_ELEMENTS());
         assertEquals(1.0, actualCalculate.getK());
         assertEquals(1, actualCalculate.getDENOMINATOR_ELEMENTS());
     }
 
     @Test
     public void testGetNEMERATOR_ELEMENTS() {
-        assertEquals(1, (new Calculate("Numerator", "Denominator", new HashMap<String, Node>(1))).getNEMERATOR_ELEMENTS());
+        assertEquals(1, (new Calculate("Numerator", "Denominator", new HashMap<String, Node>(1))).getNUMERATOR_ELEMENTS());
     }
 
     @Test
