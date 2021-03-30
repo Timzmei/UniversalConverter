@@ -7,7 +7,7 @@ import static spark.Spark.*;
 
 public class Main {
     private static final String SERVER_HOST = "localhost";
-    private static final int SERVER_PORT = 8080;
+    private static final int SERVER_PORT = 80;
 
     private static final Gson GSON = new Gson();
     private static final int STATUS_CODE_404 = 404;
@@ -56,6 +56,7 @@ public class Main {
 
         String[] fromUnitSplit = fromUnit.split("/");
         String[] toUnitSplit = toUnit.split("/");
+
         fraction = (toUnitSplit.length == 2) ? fromUnitSplit[0].trim() + " * " + toUnitSplit[1].trim() + fraction : fromUnitSplit[0].trim() + fraction;
         fraction = (fromUnitSplit.length == 2) ? fraction + fromUnitSplit[1].trim() + " * " + toUnitSplit[0].trim() : fraction + toUnitSplit[0].trim();
         return fraction;
@@ -95,7 +96,13 @@ public class Main {
     }
 
     public static String doubleToString(double k){
-        return new DecimalFormat("#0.000000000000000").format(k);
+        String[] splitter = String.valueOf(k).split("\\.");
+        if (splitter[1].length() > 15){
+            return new DecimalFormat("#0.000000000000000").format(k);
+        }
+        else {
+            return Double.toString(k);
+        }
     }
 
 
